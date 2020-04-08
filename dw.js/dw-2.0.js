@@ -1927,7 +1927,7 @@ dw.chart = function(attributes) {
             if (arguments.length) {
                 if (ds !== true) _ds = ds;
                 dataset = chart.get('metadata.data.json') ? _ds :
-                    reorderColumns(applyChanges(addComputedColumns(_ds)));
+                    reorderColumns(addComputedColumns(applyChanges(addComputedColumns(_ds))));
                 if (ds === true) return dataset;
                 return chart;
             }
@@ -2148,8 +2148,8 @@ dw.chart = function(attributes) {
         return dataset;
 
         function add_computed_column(formula, name) {
-            var datefmt = function(d) { return d.getFullYear()+'-'+left_pad(1+d.getMonth(), 2, 0)+'-'+left_pad(1+d.getDate(), 2, 0); },
-                values = data.map(function(row, row_i) {
+            var datefmt = function(d) { return d.getFullYear()+'-'+left_pad(1+d.getMonth(), 2, 0)+'-'+left_pad(1+d.getDate(), 2, 0); };
+            var values = data.map(function(row, row_i) {
                     var context = [];
                     context.push('var __row = '+row_i+';');
                     _.each(row, function(val, key) {
@@ -2173,7 +2173,9 @@ dw.chart = function(attributes) {
                             return 'n/a';
                         }
                     }).call({ context: context });
-                }).map(function(v) {
+                });
+
+            values = values.map(function(v) {
                     if (_.isBoolean(v)) return v ? 'yes' : 'no';
                     if (_.isDate(v)) return datefmt(v);
                     if (_.isNumber(v)) return ''+v;
@@ -2475,7 +2477,7 @@ _.extend(dw.visualization.base, {
             if (axes[key]) return; // user has defined this axis already
             if (axisDef.optional) {
                 // chart settings may override this
-                if (axisDef.overrideOptionalKey && me.chart().get('metadata.'+axisDef.overrideOptionalKey, false)) {
+                if (axisDef.overrideOptionalKey && me.chart().get('metadata.' + axisDef.overrideOptionalKey, false)) {
                     // now the axis is mandatory
                     axisDef.optional = false;
                 }

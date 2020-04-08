@@ -16,7 +16,6 @@
         {/each}
     </ul>
 </div>
-
 <button on:click="removeColumn()" class="btn btn-danger"><i class="fa fa-trash"></i> {__('computed columns / modal / remove')}</button>
 
 <style lang="less">
@@ -109,9 +108,9 @@
                 var s = __('describe / edit-column');
                 return s.replace('%s', `"${column ? column.title() || column.name() : '--'}"`);
             },
-            metaColumns({ columns }) {
-                if (!columns) return [];
-                return columns.map(col => {
+            metaColumns({ columns, column, allColumns }) {
+                if (!allColumns) return [];
+                return allColumns.filter(col => col.name() !== column.name()).map(col => {
                     return {
                         key: columnNameToVariable(col.name()),
                         title: col.title(),
@@ -166,13 +165,13 @@
 
         oncreate() {
             const { column } = this.get();
-
             const chart = this.store.get('dw_chart');
             const customCols = chart.get('metadata.describe.computed-columns', {});
-
+            const ds = chart.dataset();
             this.set({
                 formula: customCols[column.name()] || '',
-                name: column.title()
+                name: column.title(),
+                allColumns: ds.columns()
             });
 
             // update if column changes
@@ -254,6 +253,7 @@
                 const { column } = this.get();
                 const changes = clone(chart.get('metadata.data.changes', []));
                 const ds = chart.dataset();
+
                 const col = ds.columnOrder()[ds.indexOf(column.name())];
                 let lastColNameChangeIndex = -1;
                 changes.forEach((change, i) => {
